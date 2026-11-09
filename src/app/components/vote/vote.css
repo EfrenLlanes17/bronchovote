@@ -1,0 +1,83 @@
+.vote-page {
+	min-height: 100dvh;
+	display: grid;
+	place-items: center;
+	padding: 1.5rem;
+	background: #f4f7f6;
+	color: #172a27;
+	font-family: Arial, sans-serif;
+}
+
+.vote-card {
+	width: min(100%, 28rem);
+	padding: 2rem;
+	border: 1px solid #dce7e3;
+	border-radius: 1rem;
+	background: #fff;
+	box-shadow: 0 1rem 2.5rem rgb(24 58 48 / 8%);
+}
+
+.eyebrow {
+	margin: 0 0 0.5rem;
+	color: #28775f;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+
+h1 {
+	margin: 0 0 1.5rem;
+	font-size: clamp(1.75rem, 5vw, 2.25rem);
+}
+
+.email-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+label {
+	font-size: 0.95rem;
+	font-weight: 600;
+}
+
+input {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 0.8rem 0.9rem;
+	border: 1px solid #bdcdc7;
+	border-radius: 0.5rem;
+	font: inherit;
+}
+
+input:focus-visible,
+button:focus-visible {
+	outline: 3px solid #91cbb7;
+	outline-offset: 2px;
+}
+
+button {
+	margin-top: 0.5rem;
+	padding: 0.85rem 1rem;
+	border: 0;
+	border-radius: 0.5rem;
+	background: #206b55;
+	color: #fff;
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+button:hover {
+	background: #185540;
+}
+
+.signed-in {
+	margin: 0;
+	padding: 1rem;
+	border-radius: 0.5rem;
+	background: #edf7f2;
+	color: #205a47;
+	overflow-wrap: anywhere;
+}

@@ -1,1 +1,24 @@
-<p>vote works!</p>
+<main class="vote-page">
+	<section class="vote-card" aria-labelledby="vote-title">
+		<p class="eyebrow">BronchoVote</p>
+		<h1 id="vote-title">Cast your vote</h1>
+
+		@if (email) {
+			<p class="signed-in" aria-live="polite">Signed in as {{ email }}</p>
+		} @else {
+			<form class="email-form" (submit)="submitEmail($event, emailInput.value)">
+				<label for="voter-email">Email address</label>
+				<input
+					#emailInput
+					id="voter-email"
+					name="email"
+					type="email"
+					placeholder="you@example.com"
+					autocomplete="email"
+					required
+				/>
+				<button type="submit">Submit</button>
+			</form>
+		}
+	</section>
+</main>
