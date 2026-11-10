@@ -20,12 +20,19 @@ export class Vote implements OnInit {
     if (!trimmedEmail) return;
 
     this.email = trimmedEmail;
-    sessionStorage.setItem('email', trimmedEmail);
+    localStorage.setItem('email', trimmedEmail);
   }
 
   private getSavedEmail(): string {
+    const savedEmail = localStorage.getItem('email');
+    if (savedEmail) return savedEmail;
+
+    // Migrate an email saved by older versions from this tab's session storage.
     const sessionEmail = sessionStorage.getItem('email');
-    if (sessionEmail) return sessionEmail;
+    if (sessionEmail) {
+      localStorage.setItem('email', sessionEmail);
+      return sessionEmail;
+    }
 
     const cookie = document.cookie
       .split('; ')
