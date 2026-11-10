@@ -3,6 +3,7 @@ import {
 	DataSnapshot,
 	get,
 	onValue,
+	remove,
 	ref,
 	runTransaction,
 	type Unsubscribe,
@@ -37,6 +38,10 @@ export type CastVoteResult = 'recorded' | 'already-voted' | 'unavailable';
 
 @Injectable({ providedIn: 'root' })
 export class BillStore {
+	async deleteBill(id: string): Promise<void> {
+		await remove(ref(database, `bills/${id.toLowerCase()}`));
+	}
+
 	watchActiveBills(onBills: (bills: Bill[]) => void, onError: (error: Error) => void): Unsubscribe {
 		return onValue(
 			ref(database, 'bills'),

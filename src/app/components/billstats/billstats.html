@@ -16,6 +16,14 @@
 					<span>Total votes</span>
 				</div>
 			</header>
+			<div class="delete-row">
+				@if (deleteError()) {
+					<p class="delete-error" role="alert">{{ deleteError() }}</p>
+				}
+				<button class="delete-button" type="button" [disabled]="deleting()" (click)="deleteBill()">
+					{{ deleting() ? 'Deleting…' : 'Delete bill' }}
+				</button>
+			</div>
 
 			<section class="tally-grid" aria-label="Current vote tally">
 				<article class="tally-card aye">

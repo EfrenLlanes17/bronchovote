@@ -86,6 +86,45 @@ h1 {
 	font-size: 0.8rem;
 }
 
+.delete-row {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 1rem;
+	margin: -0.5rem 0 1.25rem;
+}
+
+.delete-error {
+	margin: 0;
+	color: #a33131;
+	font-size: 0.9rem;
+}
+
+.delete-button {
+	padding: 0.65rem 0.9rem;
+	border: 1px solid #e6b9b9;
+	border-radius: 0.5rem;
+	background: #fff;
+	color: #963c3c;
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.delete-button:hover:not(:disabled) {
+	background: #fff0ef;
+}
+
+.delete-button:focus-visible {
+	outline: 3px solid #e6b9b9;
+	outline-offset: 2px;
+}
+
+.delete-button:disabled {
+	opacity: 0.65;
+	cursor: wait;
+}
+
 .tally-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));

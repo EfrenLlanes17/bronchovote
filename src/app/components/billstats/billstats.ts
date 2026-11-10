@@ -22,6 +22,8 @@ export class Billstats implements OnInit, OnDestroy {
   protected qrCodeSvg = signal<SafeHtml | null>(null);
   protected qrCodeMarkup = signal('');
   protected qrError = signal('');
+  protected deleting = signal(false);
+  protected deleteError = signal('');
   protected readonly voteLabels: Record<VoteChoice, string> = {
     aye: 'Aye',
     nay: 'Nay',
@@ -64,6 +66,26 @@ export class Billstats implements OnInit, OnDestroy {
     link.download = `bill-${this.billId()}-vote-qr.svg`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  protected async deleteBill(): Promise<void> {
+    const bill = this.stats()?.bill;
+    if (!bill || this.deleting()) return;
+
+    const confirmed = window.confirm(
+      `Delete “${bill.name}” and all of its vote records? This cannot be undone.`,
+    );
+    if (!confirmed) return;
+
+    this.deleting.set(true);
+    this.deleteError.set('');
+    try {
+      await this.billStore.deleteBill(bill.id);
+      await this.router.navigate(['/admin']);
+    } catch {
+      this.deleteError.set('Could not delete the bill. Check database write permissions and try again.');
+      this.deleting.set(false);
+    }
   }
 
   private loadBillStats(id: string): void {
