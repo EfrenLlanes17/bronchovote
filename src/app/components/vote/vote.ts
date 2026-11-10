@@ -17,6 +17,7 @@ export class Vote implements OnInit, OnDestroy {
 		{ value: 'nay', label: 'Nay' },
 		{ value: 'abstain', label: 'Abstain' },
 	];
+	protected name = signal('');
 	protected email = signal('');
 	protected billId = signal('');
 	protected bill = signal<Bill | null>(null);
@@ -36,6 +37,7 @@ export class Vote implements OnInit, OnDestroy {
 	) {}
 
 	ngOnInit(): void {
+		this.name.set(localStorage.getItem('name') ?? '');
 		this.email.set(this.getSavedEmail());
 		this.routeSubscription = this.route.queryParamMap.subscribe((params) => {
 			this.loadBill(params.get('billId')?.trim() ?? '');
@@ -47,13 +49,16 @@ export class Vote implements OnInit, OnDestroy {
 		this.stopWatchingBill?.();
 	}
 
-	protected submitEmail(event: SubmitEvent, email: string): void {
+	protected submitVoterInfo(event: SubmitEvent, name: string, email: string): void {
 		event.preventDefault();
 
+		const trimmedName = name.trim();
 		const trimmedEmail = email.trim();
-		if (!trimmedEmail) return;
+		if (!trimmedName || !trimmedEmail) return;
 
+		this.name.set(trimmedName);
 		this.email.set(trimmedEmail);
+		localStorage.setItem('name', trimmedName);
 		localStorage.setItem('email', trimmedEmail);
 		void this.checkExistingVote(this.billId(), trimmedEmail);
 	}
@@ -65,7 +70,7 @@ export class Vote implements OnInit, OnDestroy {
 		this.savingVote.set(true);
 		this.feedbackMessage.set('');
 		try {
-			const result = await this.billStore.castVote(id, choice, this.email());
+			const result = await this.billStore.castVote(id, choice, this.email(), this.name());
 			if (result === 'already-voted') {
 				this.hasVoted.set(true);
 				this.setFeedback('A vote from this email is already recorded for this bill.', 'error');

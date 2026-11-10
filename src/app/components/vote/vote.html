@@ -16,7 +16,7 @@
 				<h2>{{ currentBill.name }}</h2>
 			</div>
 
-			@if (email()) {
+			@if (email() && name()) {
 				<p class="signed-in" aria-live="polite">Signed in as {{ email() }}</p>
 				@if (hasVoted()) {
 					<p class="vote-prompt" role="status">Your vote has already been recorded for this bill.</p>
@@ -36,13 +36,26 @@
 					}
 				</div>
 			} @else {
-				<form class="email-form" (submit)="submitEmail($event, emailInput.value)">
+				<form class="email-form" (submit)="submitVoterInfo($event, nameInput.value, emailInput.value)">
+					<label for="voter-name">Full name</label>
+					<input
+						#nameInput
+						id="voter-name"
+						name="name"
+						type="text"
+						[value]="name()"
+						placeholder="Your name"
+						autocomplete="name"
+						maxlength="120"
+						required
+					/>
 					<label for="voter-email">Email address</label>
 					<input
 						#emailInput
 						id="voter-email"
 						name="email"
 						type="email"
+						[value]="email()"
 						placeholder="you@example.com"
 						autocomplete="email"
 						required

@@ -66,9 +66,12 @@ export class BillStore {
 		return snapshot.exists();
 	}
 
-	async castVote(id: string, choice: VoteChoice, email: string): Promise<CastVoteResult> {
+	async castVote(id: string, choice: VoteChoice, email: string, name: string): Promise<CastVoteResult> {
 		const billRef = ref(database, `bills/${id.toLowerCase()}`);
 		const voterKey = this.emailToVoterKey(email);
+		const voterEmail = email.trim();
+		const voterName = name.trim();
+		if (!voterEmail || !voterName) return 'unavailable';
 		const result = await runTransaction(
 			billRef,
 			(currentValue: unknown) => {
@@ -91,7 +94,10 @@ export class BillStore {
 
 				return {
 					...bill,
-					votes: { ...votes, [voterKey]: choice },
+					votes: {
+						...votes,
+						[voterKey]: { name: voterName, email: voterEmail, choice },
+					},
 					voteCounts: { ...counts, [choice]: counts[choice] + 1 },
 				};
 			},

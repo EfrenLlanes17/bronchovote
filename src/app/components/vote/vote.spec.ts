@@ -8,20 +8,23 @@ describe('Vote', () => {
   let component: Vote;
   let fixture: ComponentFixture<Vote>;
   let voterHasVoted: boolean;
+  let savedBallot: { id: string; choice: string; email: string; name: string } | undefined;
 
   beforeEach(async () => {
     localStorage.clear();
     sessionStorage.clear();
     voterHasVoted = false;
+    savedBallot = undefined;
     const billStore: Pick<BillStore, 'watchBill' | 'hasVoted' | 'castVote'> = {
       watchBill: (id, onBill) => {
         onBill({ id, name: 'Community Health Funding Act', active: true });
         return () => undefined;
       },
       hasVoted: async () => voterHasVoted,
-      castVote: async () => {
+      castVote: async (id, choice, email, name) => {
         if (voterHasVoted) return 'already-voted';
         voterHasVoted = true;
+        savedBallot = { id, choice, email, name };
         return 'recorded';
       },
     };
@@ -44,14 +47,17 @@ describe('Vote', () => {
   });
 
   it('should retain the submitted email when the page is recreated', async () => {
+    const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('#voter-name');
     const emailInput: HTMLInputElement = fixture.nativeElement.querySelector('#voter-email');
     const form: HTMLFormElement = fixture.nativeElement.querySelector('form');
+    nameInput.value = 'Voter Name';
     emailInput.value = 'voter@example.com';
     form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
     await fixture.whenStable();
     fixture.detectChanges();
 
     expect(localStorage.getItem('email')).toBe('voter@example.com');
+    expect(localStorage.getItem('name')).toBe('Voter Name');
 
     fixture.destroy();
     fixture = TestBed.createComponent(Vote);
@@ -61,7 +67,9 @@ describe('Vote', () => {
   });
 
   it('should display and record an Aye vote for the bill in the query parameter', async () => {
+    const nameInput: HTMLInputElement = fixture.nativeElement.querySelector('#voter-name');
     const emailInput: HTMLInputElement = fixture.nativeElement.querySelector('#voter-email');
+    nameInput.value = 'Voter Name';
     emailInput.value = 'voter@example.com';
     fixture.nativeElement.querySelector('form').dispatchEvent(
       new SubmitEvent('submit', { bubbles: true, cancelable: true }),
@@ -79,11 +87,18 @@ describe('Vote', () => {
     expect(fixture.nativeElement.textContent).toContain('Your Aye vote has been recorded.');
     expect(fixture.nativeElement.textContent).not.toContain('0');
     expect(ayeButton.disabled).toBe(true);
+    expect(savedBallot).toEqual({
+      id: 'CFR-452',
+      choice: 'aye',
+      email: 'voter@example.com',
+      name: 'Voter Name',
+    });
   });
 
   it('should disable voting when the same email already voted on this bill', async () => {
     voterHasVoted = true;
     localStorage.setItem('email', 'voter@example.com');
+    localStorage.setItem('name', 'Voter Name');
     fixture.destroy();
     fixture = TestBed.createComponent(Vote);
     await fixture.whenStable();
