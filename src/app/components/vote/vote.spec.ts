@@ -1,26 +1,29 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
-import { BillStore, EMPTY_VOTE_COUNTS } from '../../services/bill-store';
+import { BillStore } from '../../services/bill-store';
 import { Vote } from './vote';
 
 describe('Vote', () => {
   let component: Vote;
   let fixture: ComponentFixture<Vote>;
+  let voterHasVoted: boolean;
 
   beforeEach(async () => {
     localStorage.clear();
     sessionStorage.clear();
-    const billStore: Pick<BillStore, 'watchBill' | 'watchVoteCounts' | 'castVote'> = {
+    voterHasVoted = false;
+    const billStore: Pick<BillStore, 'watchBill' | 'hasVoted' | 'castVote'> = {
       watchBill: (id, onBill) => {
         onBill({ id, name: 'Community Health Funding Act', active: true });
         return () => undefined;
       },
-      watchVoteCounts: (_id, onCounts) => {
-        onCounts({ ...EMPTY_VOTE_COUNTS });
-        return () => undefined;
+      hasVoted: async () => voterHasVoted,
+      castVote: async () => {
+        if (voterHasVoted) return 'already-voted';
+        voterHasVoted = true;
+        return 'recorded';
       },
-      castVote: async () => 1,
     };
 
     await TestBed.configureTestingModule({
@@ -45,6 +48,8 @@ describe('Vote', () => {
     const form: HTMLFormElement = fixture.nativeElement.querySelector('form');
     emailInput.value = 'voter@example.com';
     form.dispatchEvent(new SubmitEvent('submit', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    fixture.detectChanges();
 
     expect(localStorage.getItem('email')).toBe('voter@example.com');
 
@@ -61,6 +66,7 @@ describe('Vote', () => {
     fixture.nativeElement.querySelector('form').dispatchEvent(
       new SubmitEvent('submit', { bubbles: true, cancelable: true }),
     );
+    await fixture.whenStable();
     fixture.detectChanges();
 
     const ayeButton: HTMLButtonElement = fixture.nativeElement.querySelector('.vote-option');
@@ -71,6 +77,21 @@ describe('Vote', () => {
 
     expect(fixture.nativeElement.textContent).toContain('Community Health Funding Act');
     expect(fixture.nativeElement.textContent).toContain('Your Aye vote has been recorded.');
-    expect(ayeButton.querySelector('strong')?.textContent).toBe('1');
+    expect(fixture.nativeElement.textContent).not.toContain('0');
+    expect(ayeButton.disabled).toBe(true);
+  });
+
+  it('should disable voting when the same email already voted on this bill', async () => {
+    voterHasVoted = true;
+    localStorage.setItem('email', 'voter@example.com');
+    fixture.destroy();
+    fixture = TestBed.createComponent(Vote);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const voteButtons = fixture.nativeElement.querySelectorAll('.vote-option');
+    expect(fixture.nativeElement.textContent).toContain('already been recorded for this bill');
+    expect(voteButtons.length).toBe(3);
+    expect(Array.from(voteButtons).every((button: Element) => (button as HTMLButtonElement).disabled)).toBe(true);
   });
 });

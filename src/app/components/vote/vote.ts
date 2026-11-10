@@ -2,13 +2,8 @@ import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import type { Unsubscribe } from 'firebase/database';
 import type { Subscription } from 'rxjs';
-import {
-	Bill,
-	BillStore,
-	EMPTY_VOTE_COUNTS,
-	VoteChoice,
-	VoteCounts,
-} from '../../services/bill-store';
+import { BillStore } from '../../services/bill-store';
+import type { Bill, VoteChoice } from '../../services/bill-store';
 
 @Component({
 	imports: [],
@@ -25,16 +20,15 @@ export class Vote implements OnInit, OnDestroy {
 	protected email = signal('');
 	protected billId = signal('');
 	protected bill = signal<Bill | null>(null);
-	protected voteCounts = signal<VoteCounts>({ ...EMPTY_VOTE_COUNTS });
 	protected isLoading = signal(false);
 	protected savingVote = signal(false);
+	protected checkingVoteStatus = signal(false);
 	protected hasVoted = signal(false);
 	protected feedbackMessage = signal('');
 	protected feedbackType = signal<'error' | 'success'>('success');
 
 	private routeSubscription?: Subscription;
 	private stopWatchingBill?: Unsubscribe;
-	private stopWatchingCounts?: Unsubscribe;
 
 	constructor(
 		private readonly route: ActivatedRoute,
@@ -51,7 +45,6 @@ export class Vote implements OnInit, OnDestroy {
 	ngOnDestroy(): void {
 		this.routeSubscription?.unsubscribe();
 		this.stopWatchingBill?.();
-		this.stopWatchingCounts?.();
 	}
 
 	protected submitEmail(event: SubmitEvent, email: string): void {
@@ -62,22 +55,27 @@ export class Vote implements OnInit, OnDestroy {
 
 		this.email.set(trimmedEmail);
 		localStorage.setItem('email', trimmedEmail);
+		void this.checkExistingVote(this.billId(), trimmedEmail);
 	}
 
 	protected async castVote(choice: VoteChoice): Promise<void> {
 		const id = this.billId();
-		if (!id || !this.bill() || !this.email() || this.hasVoted() || this.savingVote()) return;
+		if (!id || !this.bill() || !this.email() || this.hasVoted() || this.checkingVoteStatus() || this.savingVote()) return;
 
 		this.savingVote.set(true);
 		this.feedbackMessage.set('');
 		try {
-			const updatedCount = await this.billStore.castVote(id, choice);
-			if (updatedCount === null) {
+			const result = await this.billStore.castVote(id, choice, this.email());
+			if (result === 'already-voted') {
+				this.hasVoted.set(true);
+				this.setFeedback('A vote from this email is already recorded for this bill.', 'error');
+				return;
+			}
+			if (result === 'unavailable') {
 				this.setFeedback('Your vote could not be saved. Please try again.', 'error');
 				return;
 			}
 
-			this.voteCounts.update((counts) => ({ ...counts, [choice]: updatedCount }));
 			this.hasVoted.set(true);
 			this.setFeedback(`Your ${this.voteOptions.find((option) => option.value === choice)?.label} vote has been recorded.`, 'success');
 		} catch {
@@ -89,10 +87,8 @@ export class Vote implements OnInit, OnDestroy {
 
 	private loadBill(id: string): void {
 		this.stopWatchingBill?.();
-		this.stopWatchingCounts?.();
 		this.billId.set(id);
 		this.bill.set(null);
-		this.voteCounts.set({ ...EMPTY_VOTE_COUNTS });
 		this.hasVoted.set(false);
 		this.feedbackMessage.set('');
 
@@ -119,11 +115,23 @@ export class Vote implements OnInit, OnDestroy {
 				this.setFeedback('Could not load this bill. Check database read permissions.', 'error');
 			},
 		);
-		this.stopWatchingCounts = this.billStore.watchVoteCounts(
-			id,
-			(counts) => this.voteCounts.set(counts),
-			() => this.setFeedback('Could not load vote totals. Check database read permissions.', 'error'),
-		);
+		if (this.email()) void this.checkExistingVote(id, this.email());
+	}
+
+	private async checkExistingVote(id: string, email: string): Promise<void> {
+		if (!id || !email || !/^[A-Za-z0-9_-]+$/.test(id)) return;
+		this.checkingVoteStatus.set(true);
+		try {
+			const alreadyVoted = await this.billStore.hasVoted(id, email);
+			if (this.billId() === id && this.email().toLowerCase() === email.toLowerCase()) {
+				this.hasVoted.set(alreadyVoted);
+				if (alreadyVoted) this.setFeedback('A vote from this email is already recorded for this bill.', 'error');
+			}
+		} catch {
+			this.setFeedback('Could not check prior voting status. The database will still reject duplicate votes.', 'error');
+		} finally {
+			this.checkingVoteStatus.set(false);
+		}
 	}
 
 	private getSavedEmail(): string {

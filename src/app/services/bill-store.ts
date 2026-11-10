@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
 	DataSnapshot,
+	get,
 	onValue,
 	ref,
 	runTransaction,
@@ -19,6 +20,8 @@ export type VoteChoice = 'aye' | 'nay' | 'abstain';
 export type VoteCounts = Record<VoteChoice, number>;
 
 export const EMPTY_VOTE_COUNTS: VoteCounts = { aye: 0, nay: 0, abstain: 0 };
+
+export type CastVoteResult = 'recorded' | 'already-voted' | 'unavailable';
 
 @Injectable({ providedIn: 'root' })
 export class BillStore {
@@ -57,46 +60,61 @@ export class BillStore {
 		);
 	}
 
-	watchVoteCounts(
-		id: string,
-		onCounts: (counts: VoteCounts) => void,
-		onError: (error: Error) => void,
-	): Unsubscribe {
-		return onValue(
-			ref(database, `bills/${id.toLowerCase()}/voteCounts`),
-			(snapshot) => {
-				const value: unknown = snapshot.val();
-				const counts = { ...EMPTY_VOTE_COUNTS };
-				if (typeof value === 'object' && value !== null) {
-					for (const choice of Object.keys(counts) as VoteChoice[]) {
-						const count = (value as Record<string, unknown>)[choice];
-						if (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0) {
-							counts[choice] = count;
-						}
-					}
-				}
-				onCounts(counts);
-			},
-			onError,
-		);
+	async hasVoted(id: string, email: string): Promise<boolean> {
+		const voterKey = this.emailToVoterKey(email);
+		const snapshot = await get(ref(database, `bills/${id.toLowerCase()}/votes/${voterKey}`));
+		return snapshot.exists();
 	}
 
-	async castVote(id: string, choice: VoteChoice): Promise<number | null> {
-		const countRef = ref(database, `bills/${id.toLowerCase()}/voteCounts/${choice}`);
+	async castVote(id: string, choice: VoteChoice, email: string): Promise<CastVoteResult> {
+		const billRef = ref(database, `bills/${id.toLowerCase()}`);
+		const voterKey = this.emailToVoterKey(email);
 		const result = await runTransaction(
-			countRef,
+			billRef,
 			(currentValue: unknown) => {
-				if (currentValue === null) return 1;
-				if (typeof currentValue === 'number' && Number.isSafeInteger(currentValue) && currentValue >= 0) {
-					return currentValue + 1;
+				if (typeof currentValue !== 'object' || currentValue === null || !('active' in currentValue) || currentValue.active !== true) {
+					return undefined;
 				}
-				return undefined;
+
+				const bill = currentValue as Record<string, unknown>;
+				const votes = this.asRecord(bill['votes']);
+				if (voterKey in votes) return undefined;
+
+				const storedCounts = this.asRecord(bill['voteCounts']);
+				const counts = { ...EMPTY_VOTE_COUNTS };
+				for (const voteChoice of Object.keys(counts) as VoteChoice[]) {
+					const count = storedCounts[voteChoice];
+					if (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0) {
+						counts[voteChoice] = count;
+					}
+				}
+
+				return {
+					...bill,
+					votes: { ...votes, [voterKey]: choice },
+					voteCounts: { ...counts, [choice]: counts[choice] + 1 },
+				};
 			},
 			{ applyLocally: false },
 		);
 
-		const updatedCount: unknown = result.snapshot.val();
-		return result.committed && typeof updatedCount === 'number' ? updatedCount : null;
+		if (result.committed) return 'recorded';
+
+		const currentBill: unknown = result.snapshot.val();
+		if (typeof currentBill === 'object' && currentBill !== null && 'votes' in currentBill) {
+			const votes = this.asRecord(currentBill.votes);
+			if (voterKey in votes) return 'already-voted';
+		}
+		return 'unavailable';
+	}
+
+	private emailToVoterKey(email: string): string {
+		const bytes = new TextEncoder().encode(email.trim().toLowerCase());
+		return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+	}
+
+	private asRecord(value: unknown): Record<string, unknown> {
+		return typeof value === 'object' && value !== null ? value as Record<string, unknown> : {};
 	}
 
 	private readBills(snapshot: DataSnapshot): Bill[] {

@@ -18,17 +18,20 @@
 
 			@if (email()) {
 				<p class="signed-in" aria-live="polite">Signed in as {{ email() }}</p>
-				<p class="vote-prompt">Choose one option</p>
+				@if (hasVoted()) {
+					<p class="vote-prompt" role="status">Your vote has already been recorded for this bill.</p>
+				} @else {
+					<p class="vote-prompt">Choose one option</p>
+				}
 				<div class="vote-options" aria-label="Vote options">
 					@for (option of voteOptions; track option.value) {
 						<button
 							class="vote-option"
 							type="button"
-							[disabled]="savingVote() || hasVoted()"
+							[disabled]="savingVote() || checkingVoteStatus() || hasVoted()"
 							(click)="castVote(option.value)"
 						>
 							<span>{{ option.label }}</span>
-							<strong>{{ voteCounts()[option.value] }}</strong>
 						</button>
 					}
 				</div>
