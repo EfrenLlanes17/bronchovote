@@ -37,6 +37,96 @@ h1 {
 	gap: 0.75rem;
 }
 
+.bill-heading {
+	margin-bottom: 1.25rem;
+	padding: 1rem;
+	border: 1px solid #dce7e3;
+	border-radius: 0.65rem;
+	background: #f7faf8;
+}
+
+.bill-heading h2,
+.notice h2 {
+	margin: 0;
+	font-size: 1.15rem;
+}
+
+.bill-id {
+	margin: 0 0 0.35rem;
+	color: #28775f;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.notice {
+	padding: 1rem;
+	border-radius: 0.65rem;
+	background: #f7faf8;
+	color: #52635e;
+}
+
+.notice h2 {
+	margin-bottom: 0.5rem;
+	color: #172a27;
+}
+
+.notice p {
+	margin: 0;
+	line-height: 1.5;
+}
+
+.vote-prompt {
+	margin: 1.25rem 0 0.65rem;
+	font-size: 0.9rem;
+	font-weight: 700;
+}
+
+.vote-options {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 0.65rem;
+}
+
+.vote-option {
+	display: grid;
+	gap: 0.45rem;
+	justify-items: center;
+	margin: 0;
+	padding: 1rem 0.5rem;
+	border: 1px solid #dce7e3;
+	background: #f7faf8;
+	color: #172a27;
+	font-size: 0.95rem;
+}
+
+.vote-option:hover:not(:disabled) {
+	border-color: #206b55;
+	background: #edf7f2;
+	color: #205a47;
+}
+
+.vote-option:disabled {
+	background: #edf7f2;
+	color: #205a47;
+	cursor: default;
+}
+
+.vote-option strong {
+	font-size: 1.25rem;
+}
+
+.feedback {
+	margin: 1rem 0 0;
+	color: #206b55;
+	font-size: 0.9rem;
+}
+
+.feedback.error {
+	color: #a33131;
+}
+
 label {
 	font-size: 0.95rem;
 	font-weight: 600;
@@ -80,4 +170,14 @@ button:hover {
 	background: #edf7f2;
 	color: #205a47;
 	overflow-wrap: anywhere;
+}
+
+@media (max-width: 420px) {
+	.vote-card {
+		padding: 1.25rem;
+	}
+
+	.vote-options {
+		grid-template-columns: 1fr;
+	}
 }

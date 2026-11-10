@@ -3,22 +3,58 @@
 		<p class="eyebrow">BronchoVote</p>
 		<h1 id="vote-title">Cast your vote</h1>
 
-		@if (email) {
-			<p class="signed-in" aria-live="polite">Signed in as {{ email }}</p>
+		@if (!billId()) {
+			<div class="notice">
+				<h2>Select a bill to vote on</h2>
+				<p>Open a voting link that includes a bill ID, for example <strong>/vote?billId=CFR-452</strong>.</p>
+			</div>
+		} @else if (isLoading()) {
+			<p class="notice" role="status">Loading bill…</p>
+		} @else if (bill(); as currentBill) {
+			<div class="bill-heading">
+				<p class="bill-id">Bill {{ currentBill.id }}</p>
+				<h2>{{ currentBill.name }}</h2>
+			</div>
+
+			@if (email()) {
+				<p class="signed-in" aria-live="polite">Signed in as {{ email() }}</p>
+				<p class="vote-prompt">Choose one option</p>
+				<div class="vote-options" aria-label="Vote options">
+					@for (option of voteOptions; track option.value) {
+						<button
+							class="vote-option"
+							type="button"
+							[disabled]="savingVote() || hasVoted()"
+							(click)="castVote(option.value)"
+						>
+							<span>{{ option.label }}</span>
+							<strong>{{ voteCounts()[option.value] }}</strong>
+						</button>
+					}
+				</div>
+			} @else {
+				<form class="email-form" (submit)="submitEmail($event, emailInput.value)">
+					<label for="voter-email">Email address</label>
+					<input
+						#emailInput
+						id="voter-email"
+						name="email"
+						type="email"
+						placeholder="you@example.com"
+						autocomplete="email"
+						required
+					/>
+					<button type="submit">Continue to vote</button>
+				</form>
+			}
 		} @else {
-			<form class="email-form" (submit)="submitEmail($event, emailInput.value)">
-				<label for="voter-email">Email address</label>
-				<input
-					#emailInput
-					id="voter-email"
-					name="email"
-					type="email"
-					placeholder="you@example.com"
-					autocomplete="email"
-					required
-				/>
-				<button type="submit">Submit</button>
-			</form>
+			<p class="notice" role="status">This bill is unavailable.</p>
+		}
+
+		@if (feedbackMessage()) {
+			<p class="feedback" [class.error]="feedbackType() === 'error'" role="status" aria-live="polite">
+				{{ feedbackMessage() }}
+			</p>
 		}
 	</section>
 </main>

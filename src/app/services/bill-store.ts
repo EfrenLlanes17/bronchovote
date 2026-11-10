@@ -14,6 +14,12 @@ export interface Bill {
 	active: boolean;
 }
 
+export type VoteChoice = 'aye' | 'nay' | 'abstain';
+
+export type VoteCounts = Record<VoteChoice, number>;
+
+export const EMPTY_VOTE_COUNTS: VoteCounts = { aye: 0, nay: 0, abstain: 0 };
+
 @Injectable({ providedIn: 'root' })
 export class BillStore {
 	watchActiveBills(onBills: (bills: Bill[]) => void, onError: (error: Error) => void): Unsubscribe {
@@ -34,6 +40,63 @@ export class BillStore {
 		);
 
 		return result.committed;
+	}
+
+	watchBill(
+		id: string,
+		onBill: (bill: Bill | null) => void,
+		onError: (error: Error) => void,
+	): Unsubscribe {
+		return onValue(
+			ref(database, `bills/${id.toLowerCase()}`),
+			(snapshot) => {
+				const value: unknown = snapshot.val();
+				onBill(this.isActiveBill(value) ? value : null);
+			},
+			onError,
+		);
+	}
+
+	watchVoteCounts(
+		id: string,
+		onCounts: (counts: VoteCounts) => void,
+		onError: (error: Error) => void,
+	): Unsubscribe {
+		return onValue(
+			ref(database, `bills/${id.toLowerCase()}/voteCounts`),
+			(snapshot) => {
+				const value: unknown = snapshot.val();
+				const counts = { ...EMPTY_VOTE_COUNTS };
+				if (typeof value === 'object' && value !== null) {
+					for (const choice of Object.keys(counts) as VoteChoice[]) {
+						const count = (value as Record<string, unknown>)[choice];
+						if (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0) {
+							counts[choice] = count;
+						}
+					}
+				}
+				onCounts(counts);
+			},
+			onError,
+		);
+	}
+
+	async castVote(id: string, choice: VoteChoice): Promise<number | null> {
+		const countRef = ref(database, `bills/${id.toLowerCase()}/voteCounts/${choice}`);
+		const result = await runTransaction(
+			countRef,
+			(currentValue: unknown) => {
+				if (currentValue === null) return 1;
+				if (typeof currentValue === 'number' && Number.isSafeInteger(currentValue) && currentValue >= 0) {
+					return currentValue + 1;
+				}
+				return undefined;
+			},
+			{ applyLocally: false },
+		);
+
+		const updatedCount: unknown = result.snapshot.val();
+		return result.committed && typeof updatedCount === 'number' ? updatedCount : null;
 	}
 
 	private readBills(snapshot: DataSnapshot): Bill[] {
