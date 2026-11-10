@@ -1,1 +1,81 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+	color-scheme: light;
+	--uco-blue: #003366;
+	--uco-blue-deep: #00264d;
+	--uco-blue-light: #eaf1f8;
+	--uco-gold: #ffcc00;
+	--uco-gold-light: #fff6cf;
+	--uco-ink: #17283d;
+	--uco-muted: #5b6b7e;
+	--uco-border: #d7e0e9;
+	--uco-page: #f3f6fa;
+	--uco-white: #fff;
+	--uco-green: #236548;
+	--uco-green-light: #eaf4ee;
+	--uco-red: #963c3c;
+	--uco-red-light: #fff0ef;
+	font-family: Arial, Helvetica, sans-serif;
+	color: var(--uco-ink);
+	background: var(--uco-page);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	min-width: 320px;
+	min-height: 100vh;
+	margin: 0;
+	background: var(--uco-page);
+	color: var(--uco-ink);
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input {
+	font: inherit;
+}
+
+.uco-brand-lockup {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.8rem;
+	color: var(--uco-blue);
+}
+
+.uco-brand-mark {
+	display: grid;
+	place-items: center;
+	width: 3.25rem;
+	height: 3.25rem;
+	border: 2px solid var(--uco-gold);
+	border-radius: 0.3rem;
+	background: var(--uco-blue);
+	color: var(--uco-white);
+	font-size: 1.15rem;
+	font-weight: 900;
+	letter-spacing: -0.06em;
+}
+
+.uco-brand-copy {
+	display: grid;
+	gap: 0.15rem;
+}
+
+.uco-brand-copy strong {
+	font-size: 0.83rem;
+	letter-spacing: 0.015em;
+}
+
+.uco-brand-copy span {
+	color: var(--uco-muted);
+	font-size: 0.78rem;
+}
+
+::selection {
+	background: var(--uco-gold);
+	color: var(--uco-blue-deep);
+}

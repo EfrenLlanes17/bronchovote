@@ -3,23 +3,27 @@
 	display: grid;
 	place-items: center;
 	padding: 1.5rem;
-	background: #f4f7f6;
-	color: #172a27;
-	font-family: Arial, sans-serif;
+	background: var(--uco-page);
+	color: var(--uco-ink);
 }
 
 .vote-card {
 	width: min(100%, 28rem);
 	padding: 2rem;
-	border: 1px solid #dce7e3;
+	border: 1px solid var(--uco-border);
+	border-top: 5px solid var(--uco-gold);
 	border-radius: 1rem;
 	background: #fff;
-	box-shadow: 0 1rem 2.5rem rgb(24 58 48 / 8%);
+	box-shadow: 0 1rem 2.5rem rgb(0 51 102 / 9%);
+}
+
+.vote-card > .uco-brand-lockup {
+	margin-bottom: 1.5rem;
 }
 
 .eyebrow {
 	margin: 0 0 0.5rem;
-	color: #28775f;
+	color: var(--uco-blue);
 	font-size: 0.8rem;
 	font-weight: 700;
 	letter-spacing: 0.12em;
@@ -40,9 +44,9 @@ h1 {
 .bill-heading {
 	margin-bottom: 1.25rem;
 	padding: 1rem;
-	border: 1px solid #dce7e3;
+	border: 1px solid var(--uco-border);
 	border-radius: 0.65rem;
-	background: #f7faf8;
+	background: var(--uco-blue-light);
 }
 
 .bill-heading h2,
@@ -53,7 +57,7 @@ h1 {
 
 .bill-id {
 	margin: 0 0 0.35rem;
-	color: #28775f;
+	color: var(--uco-blue);
 	font-size: 0.75rem;
 	font-weight: 700;
 	letter-spacing: 0.08em;
@@ -63,13 +67,13 @@ h1 {
 .notice {
 	padding: 1rem;
 	border-radius: 0.65rem;
-	background: #f7faf8;
-	color: #52635e;
+	background: var(--uco-blue-light);
+	color: var(--uco-muted);
 }
 
 .notice h2 {
 	margin-bottom: 0.5rem;
-	color: #172a27;
+	color: var(--uco-ink);
 }
 
 .notice p {
@@ -95,21 +99,21 @@ h1 {
 	justify-items: center;
 	margin: 0;
 	padding: 1rem 0.5rem;
-	border: 1px solid #dce7e3;
-	background: #f7faf8;
-	color: #172a27;
+	border: 1px solid var(--uco-border);
+	background: var(--uco-blue-light);
+	color: var(--uco-ink);
 	font-size: 0.95rem;
 }
 
 .vote-option:hover:not(:disabled) {
-	border-color: #206b55;
-	background: #edf7f2;
-	color: #205a47;
+	border-color: var(--uco-blue);
+	background: var(--uco-gold-light);
+	color: var(--uco-blue);
 }
 
 .vote-option:disabled {
-	background: #edf7f2;
-	color: #205a47;
+	background: var(--uco-gold-light);
+	color: var(--uco-blue);
 	cursor: default;
 }
 
@@ -119,12 +123,12 @@ h1 {
 
 .feedback {
 	margin: 1rem 0 0;
-	color: #206b55;
+	color: var(--uco-blue);
 	font-size: 0.9rem;
 }
 
 .feedback.error {
-	color: #a33131;
+	color: var(--uco-red);
 }
 
 label {
@@ -136,14 +140,14 @@ input {
 	width: 100%;
 	box-sizing: border-box;
 	padding: 0.8rem 0.9rem;
-	border: 1px solid #bdcdc7;
+	border: 1px solid var(--uco-border);
 	border-radius: 0.5rem;
 	font: inherit;
 }
 
 input:focus-visible,
 button:focus-visible {
-	outline: 3px solid #91cbb7;
+	outline: 3px solid var(--uco-gold);
 	outline-offset: 2px;
 }
 
@@ -152,23 +156,24 @@ button {
 	padding: 0.85rem 1rem;
 	border: 0;
 	border-radius: 0.5rem;
-	background: #206b55;
-	color: #fff;
+	background: var(--uco-blue);
+	box-shadow: inset 0 -3px 0 var(--uco-gold);
+	color: var(--uco-white);
 	font: inherit;
 	font-weight: 700;
 	cursor: pointer;
 }
 
 button:hover {
-	background: #185540;
+	background: var(--uco-blue-deep);
 }
 
 .signed-in {
 	margin: 0;
 	padding: 1rem;
 	border-radius: 0.5rem;
-	background: #edf7f2;
-	color: #205a47;
+	background: var(--uco-gold-light);
+	color: var(--uco-blue);
 	overflow-wrap: anywhere;
 }
 

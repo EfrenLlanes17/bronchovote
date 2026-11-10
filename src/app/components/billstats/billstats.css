@@ -1,9 +1,8 @@
 .stats-page {
 	min-height: 100dvh;
 	padding: clamp(1.25rem, 5vw, 4rem);
-	background: #f3f7f5;
-	color: #172a27;
-	font-family: Arial, sans-serif;
+	background: var(--uco-page);
+	color: var(--uco-ink);
 }
 
 .stats-shell {
@@ -11,10 +10,17 @@
 	margin: 0 auto;
 }
 
+.stats-toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1.25rem;
+	margin-bottom: 1.5rem;
+}
+
 .back-link {
 	display: inline-block;
-	margin-bottom: 1.5rem;
-	color: #206b55;
+	color: var(--uco-blue);
 	font-weight: 700;
 	text-decoration: none;
 }
@@ -24,7 +30,7 @@
 }
 
 .back-link:focus-visible {
-	outline: 3px solid #91cbb7;
+	outline: 3px solid var(--uco-gold);
 	outline-offset: 3px;
 }
 
@@ -40,7 +46,7 @@
 .section-label,
 .bill-id {
 	margin: 0 0 0.45rem;
-	color: #28775f;
+	color: var(--uco-blue);
 	font-size: 0.75rem;
 	font-weight: 700;
 	letter-spacing: 0.11em;
@@ -63,10 +69,10 @@ h1 {
 .total-card,
 .panel,
 .tally-card {
-	border: 1px solid #dce7e3;
+	border: 1px solid var(--uco-border);
 	border-radius: 0.9rem;
-	background: #fff;
-	box-shadow: 0 0.8rem 2rem rgb(24 58 48 / 5%);
+	background: var(--uco-white);
+	box-shadow: 0 0.8rem 2rem rgb(0 51 102 / 6%);
 }
 
 .total-card {
@@ -82,7 +88,7 @@ h1 {
 
 .total-card span,
 .tally-card span {
-	color: #61736e;
+	color: var(--uco-muted);
 	font-size: 0.8rem;
 }
 
@@ -96,7 +102,7 @@ h1 {
 
 .delete-error {
 	margin: 0;
-	color: #a33131;
+	color: var(--uco-red);
 	font-size: 0.9rem;
 }
 
@@ -104,15 +110,15 @@ h1 {
 	padding: 0.65rem 0.9rem;
 	border: 1px solid #e6b9b9;
 	border-radius: 0.5rem;
-	background: #fff;
-	color: #963c3c;
+	background: var(--uco-white);
+	color: var(--uco-red);
 	font: inherit;
 	font-weight: 700;
 	cursor: pointer;
 }
 
 .delete-button:hover:not(:disabled) {
-	background: #fff0ef;
+	background: var(--uco-red-light);
 }
 
 .delete-button:focus-visible {
@@ -144,7 +150,8 @@ h1 {
 }
 
 .tally-card.aye {
-	border-left: 4px solid #30946b;
+	border-left: 4px solid var(--uco-blue);
+	background: var(--uco-blue-light);
 }
 
 .tally-card.nay {
@@ -152,7 +159,8 @@ h1 {
 }
 
 .tally-card.abstain {
-	border-left: 4px solid #a68b43;
+	border-left: 4px solid var(--uco-gold);
+	background: var(--uco-gold-light);
 }
 
 .panel {
@@ -178,13 +186,13 @@ h1 {
 
 .qr-copy > p:not(.section-label, .qr-error) {
 	margin-bottom: 0.5rem;
-	color: #61736e;
+	color: var(--uco-muted);
 }
 
 .voting-url {
 	display: block;
 	margin-bottom: 0.75rem;
-	color: #206b55;
+	color: var(--uco-blue);
 	font-size: 0.85rem;
 	overflow-wrap: anywhere;
 }
@@ -193,15 +201,16 @@ h1 {
 	padding: 0.7rem 0.9rem;
 	border: 0;
 	border-radius: 0.5rem;
-	background: #206b55;
-	color: #fff;
+	background: var(--uco-blue);
+	box-shadow: inset 0 -3px 0 var(--uco-gold);
+	color: var(--uco-white);
 	font: inherit;
 	font-weight: 700;
 	cursor: pointer;
 }
 
 .download-button:hover:not(:disabled) {
-	background: #185540;
+	background: var(--uco-blue-deep);
 }
 
 .download-button:disabled {
@@ -210,7 +219,7 @@ h1 {
 }
 
 .download-button:focus-visible {
-	outline: 3px solid #91cbb7;
+	outline: 3px solid var(--uco-gold);
 	outline-offset: 2px;
 }
 
@@ -223,19 +232,19 @@ h1 {
 	height: 220px;
 	box-sizing: border-box;
 	padding: 0.5rem;
-	border: 1px solid #dce7e3;
+	border: 1px solid var(--uco-border);
 	border-radius: 0.75rem;
-	background: #fff;
+	background: var(--uco-white);
 }
 
 .qr-placeholder {
-	color: #61736e;
+	color: var(--uco-muted);
 	font-size: 0.85rem;
 }
 
 .qr-error {
 	margin: 0.5rem 0 0;
-	color: #a33131;
+	color: var(--uco-red);
 	font-size: 0.85rem;
 }
 
@@ -260,8 +269,8 @@ h1 {
 .count-pill {
 	padding: 0.35rem 0.7rem;
 	border-radius: 999px;
-	background: #edf7f2;
-	color: #205a47;
+	background: var(--uco-blue-light);
+	color: var(--uco-blue);
 	font-size: 0.78rem;
 	font-weight: 700;
 }
@@ -279,12 +288,12 @@ table {
 th,
 td {
 	padding: 0.9rem 0.75rem;
-	border-top: 1px solid #edf1ef;
+	border-top: 1px solid var(--uco-border);
 	vertical-align: middle;
 }
 
 th {
-	color: #61736e;
+	color: var(--uco-muted);
 	font-size: 0.75rem;
 	letter-spacing: 0.05em;
 	text-transform: uppercase;
@@ -304,30 +313,30 @@ td {
 }
 
 .choice-pill.aye {
-	background: #edf7f2;
-	color: #205a47;
+	background: var(--uco-blue-light);
+	color: var(--uco-blue);
 }
 
 .choice-pill.nay {
-	background: #fff0ef;
-	color: #963c3c;
+	background: var(--uco-red-light);
+	color: var(--uco-red);
 }
 
 .choice-pill.abstain {
-	background: #f8f3e7;
-	color: #806b30;
+	background: var(--uco-gold-light);
+	color: var(--uco-blue-deep);
 }
 
 .empty-state,
 .notice {
 	padding: 2rem 1rem;
-	color: #61736e;
+	color: var(--uco-muted);
 	text-align: center;
 }
 
 .empty-state h3 {
 	margin-bottom: 0.4rem;
-	color: #172a27;
+	color: var(--uco-ink);
 }
 
 .empty-state p {
@@ -335,6 +344,11 @@ td {
 }
 
 @media (max-width: 600px) {
+	.stats-toolbar {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
 	.qr-panel {
 		flex-direction: column-reverse;
 		align-items: stretch;

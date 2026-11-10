@@ -1,6 +1,12 @@
 <main class="stats-page">
 	<div class="stats-shell">
-		<a class="back-link" routerLink="/admin">← Back to bill management</a>
+		<div class="stats-toolbar">
+			<div class="uco-brand-lockup" aria-label="University of Central Oklahoma BronchoVote">
+				<span class="uco-brand-mark" aria-hidden="true">UCO</span>
+				<span class="uco-brand-copy"><strong>University of Central Oklahoma</strong><span>BronchoVote · Bill details</span></span>
+			</div>
+			<a class="back-link" routerLink="/admin">← Bill management</a>
+		</div>
 
 		@if (loading()) {
 			<section class="panel notice" role="status">Loading bill statistics…</section>
