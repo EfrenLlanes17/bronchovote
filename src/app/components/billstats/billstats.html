@@ -32,6 +32,26 @@
 				</article>
 			</section>
 
+			<section class="panel qr-panel" aria-labelledby="qr-title">
+				<div class="qr-copy">
+					<p class="section-label">SHARE THIS BILL</p>
+					<h2 id="qr-title">Voting QR code</h2>
+					<p>Scan this code to open the voting page for {{ billStats.bill.name }}.</p>
+					<a class="voting-url" [href]="votingUrl()">{{ votingUrl() }}</a>
+					<button class="download-button" type="button" [disabled]="!qrCodeMarkup()" (click)="downloadQrCode()">
+						Download QR code
+					</button>
+					@if (qrError()) {
+						<p class="qr-error" role="status">{{ qrError() }}</p>
+					}
+				</div>
+				@if (qrCodeSvg(); as qrSvg) {
+					<div class="qr-image" [innerHTML]="qrSvg" role="img" [attr.aria-label]="'QR code for voting on ' + billStats.bill.name"></div>
+				} @else if (!qrError()) {
+					<div class="qr-placeholder" role="status">Generating QR code…</div>
+				}
+			</section>
+
 			<section class="panel voter-panel" aria-labelledby="voter-title">
 				<div class="panel-heading">
 					<div>

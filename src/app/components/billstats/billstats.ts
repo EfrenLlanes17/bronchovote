@@ -1,7 +1,9 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DomSanitizer, type SafeHtml } from '@angular/platform-browser';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import type { Unsubscribe } from 'firebase/database';
 import type { Subscription } from 'rxjs';
+import * as QRCode from 'qrcode';
 import { BillStore } from '../../services/bill-store';
 import type { BillStats, VoteChoice } from '../../services/bill-store';
 
@@ -16,6 +18,10 @@ export class Billstats implements OnInit, OnDestroy {
   protected stats = signal<BillStats | null>(null);
   protected loading = signal(true);
   protected errorMessage = signal('');
+  protected votingUrl = signal('');
+  protected qrCodeSvg = signal<SafeHtml | null>(null);
+  protected qrCodeMarkup = signal('');
+  protected qrError = signal('');
   protected readonly voteLabels: Record<VoteChoice, string> = {
     aye: 'Aye',
     nay: 'Nay',
@@ -27,6 +33,8 @@ export class Billstats implements OnInit, OnDestroy {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly sanitizer: DomSanitizer,
     private readonly billStore: BillStore,
   ) {}
 
@@ -46,11 +54,27 @@ export class Billstats implements OnInit, OnDestroy {
     return counts ? counts.aye + counts.nay + counts.abstain : 0;
   }
 
+  protected downloadQrCode(): void {
+    const markup = this.qrCodeMarkup();
+    if (!markup) return;
+
+    const url = URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `bill-${this.billId()}-vote-qr.svg`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   private loadBillStats(id: string): void {
     this.stopWatching?.();
     this.billId.set(id);
     this.stats.set(null);
     this.errorMessage.set('');
+    this.votingUrl.set('');
+    this.qrCodeSvg.set(null);
+    this.qrCodeMarkup.set('');
+    this.qrError.set('');
 
     if (!/^[A-Za-z0-9_-]+$/.test(id)) {
       this.loading.set(false);
@@ -64,12 +88,35 @@ export class Billstats implements OnInit, OnDestroy {
       (stats) => {
         this.stats.set(stats);
         this.loading.set(false);
-        if (!stats) this.errorMessage.set('This bill could not be found or is inactive.');
+        if (!stats) {
+          this.errorMessage.set('This bill could not be found or is inactive.');
+        } else {
+          this.createVotingQrCode(stats.bill.id);
+        }
       },
       () => {
         this.loading.set(false);
         this.errorMessage.set('Could not load bill details. Check database read permissions.');
       },
     );
+  }
+
+  private async createVotingQrCode(id: string): Promise<void> {
+    const urlTree = this.router.createUrlTree(['/vote'], { queryParams: { billId: id } });
+    const url = `${window.location.origin}${this.router.serializeUrl(urlTree)}`;
+    this.votingUrl.set(url);
+    try {
+      const markup = await QRCode.toString(url, {
+        type: 'svg',
+        width: 200,
+        margin: 2,
+        errorCorrectionLevel: 'M',
+      });
+      if (this.billId() !== id) return;
+      this.qrCodeMarkup.set(markup);
+      this.qrCodeSvg.set(this.sanitizer.bypassSecurityTrustHtml(markup));
+    } catch {
+      this.qrError.set('Could not generate the voting QR code.');
+    }
   }
 }
