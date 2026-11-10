@@ -1,1 +1,72 @@
-<p>billstats works!</p>
+<main class="stats-page">
+	<div class="stats-shell">
+		<a class="back-link" routerLink="/admin">← Back to bill management</a>
+
+		@if (loading()) {
+			<section class="panel notice" role="status">Loading bill statistics…</section>
+		} @else if (stats(); as billStats) {
+			<header class="stats-header">
+				<div>
+					<p class="eyebrow">BronchoVote · Bill results</p>
+					<p class="bill-id">Bill {{ billStats.bill.id }}</p>
+					<h1>{{ billStats.bill.name }}</h1>
+				</div>
+				<div class="total-card">
+					<strong>{{ totalVotes() }}</strong>
+					<span>Total votes</span>
+				</div>
+			</header>
+
+			<section class="tally-grid" aria-label="Current vote tally">
+				<article class="tally-card aye">
+					<span>Aye</span>
+					<strong>{{ billStats.voteCounts.aye }}</strong>
+				</article>
+				<article class="tally-card nay">
+					<span>Nay</span>
+					<strong>{{ billStats.voteCounts.nay }}</strong>
+				</article>
+				<article class="tally-card abstain">
+					<span>Abstain</span>
+					<strong>{{ billStats.voteCounts.abstain }}</strong>
+				</article>
+			</section>
+
+			<section class="panel voter-panel" aria-labelledby="voter-title">
+				<div class="panel-heading">
+					<div>
+					<p class="section-label">BALLOTS</p>
+					<h2 id="voter-title">Who voted</h2>
+				</div>
+				<span class="count-pill">{{ billStats.votes.length }}</span>
+			</div>
+
+				@if (billStats.votes.length) {
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr><th scope="col">Voter</th><th scope="col">Email</th><th scope="col">Vote</th></tr>
+							</thead>
+							<tbody>
+								@for (vote of billStats.votes; track $index) {
+									<tr>
+										<td>{{ vote.name }}</td>
+										<td>{{ vote.email }}</td>
+										<td><span class="choice-pill" [class]="'choice-pill ' + vote.choice">{{ voteLabels[vote.choice] }}</span></td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				} @else {
+					<div class="empty-state">
+						<h3>No votes yet</h3>
+						<p>Submitted ballots will appear here.</p>
+					</div>
+				}
+			</section>
+		} @else {
+			<section class="panel notice" role="status">{{ errorMessage() || 'Bill not found.' }}</section>
+		}
+	</div>
+</main>

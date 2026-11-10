@@ -15,6 +15,18 @@ export interface Bill {
 	active: boolean;
 }
 
+export interface BillVote {
+	name: string;
+	email: string;
+	choice: VoteChoice;
+}
+
+export interface BillStats {
+	bill: Bill;
+	voteCounts: VoteCounts;
+	votes: BillVote[];
+}
+
 export type VoteChoice = 'aye' | 'nay' | 'abstain';
 
 export type VoteCounts = Record<VoteChoice, number>;
@@ -55,6 +67,38 @@ export class BillStore {
 			(snapshot) => {
 				const value: unknown = snapshot.val();
 				onBill(this.isActiveBill(value) ? value : null);
+			},
+			onError,
+		);
+	}
+
+	watchBillStats(
+		id: string,
+		onStats: (stats: BillStats | null) => void,
+		onError: (error: Error) => void,
+	): Unsubscribe {
+		return onValue(
+			ref(database, `bills/${id.toLowerCase()}`),
+			(snapshot) => {
+				const value: unknown = snapshot.val();
+				if (!this.isActiveBill(value)) {
+					onStats(null);
+					return;
+				}
+
+				const record = value as unknown as Record<string, unknown>;
+				const rawCounts = this.asRecord(record['voteCounts']);
+				const voteCounts = { ...EMPTY_VOTE_COUNTS };
+				for (const choice of Object.keys(voteCounts) as VoteChoice[]) {
+					const count = rawCounts[choice];
+					if (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0) {
+						voteCounts[choice] = count;
+					}
+				}
+
+				const rawVotes = this.asRecord(record['votes']);
+				const votes = Object.values(rawVotes).map((value) => this.toBillVote(value));
+				onStats({ bill: value, voteCounts, votes });
 			},
 			onError,
 		);
@@ -121,6 +165,22 @@ export class BillStore {
 
 	private asRecord(value: unknown): Record<string, unknown> {
 		return typeof value === 'object' && value !== null ? value as Record<string, unknown> : {};
+	}
+
+	private toBillVote(value: unknown): BillVote {
+		if (typeof value === 'string' && this.isVoteChoice(value)) {
+			return { name: 'Voter information unavailable', email: '—', choice: value };
+		}
+		const record = this.asRecord(value);
+		return {
+			name: typeof record['name'] === 'string' ? record['name'] : 'Voter information unavailable',
+			email: typeof record['email'] === 'string' ? record['email'] : '—',
+			choice: this.isVoteChoice(record['choice']) ? record['choice'] : 'abstain',
+		};
+	}
+
+	private isVoteChoice(value: unknown): value is VoteChoice {
+		return value === 'aye' || value === 'nay' || value === 'abstain';
 	}
 
 	private readBills(snapshot: DataSnapshot): Bill[] {

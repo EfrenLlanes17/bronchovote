@@ -214,11 +214,27 @@ button:disabled {
 }
 
 .bill-item {
+	padding: 1rem 0;
+	border-top: 1px solid #edf1ef;
+}
+
+.bill-link {
 	display: flex;
 	align-items: center;
 	gap: 0.9rem;
-	padding: 1rem 0;
-	border-top: 1px solid #edf1ef;
+	color: inherit;
+	text-decoration: none;
+}
+
+.bill-link:hover .bill-details h3 {
+	color: #206b55;
+	text-decoration: underline;
+}
+
+.bill-link:focus-visible {
+	border-radius: 0.5rem;
+	outline: 3px solid #91cbb7;
+	outline-offset: 4px;
 }
 
 .bill-icon {
@@ -302,7 +318,7 @@ button:disabled {
 		padding: 0.65rem;
 	}
 
-	.bill-item {
+	.bill-link {
 		flex-wrap: wrap;
 	}
 

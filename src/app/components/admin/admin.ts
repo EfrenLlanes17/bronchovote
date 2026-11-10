@@ -1,9 +1,10 @@
 import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Bill, BillStore } from '../../services/bill-store';
 
 @Component({
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   selector: 'app-admin',
   styleUrl: './admin.css',
   templateUrl: './admin.html',

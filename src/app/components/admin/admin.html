@@ -74,12 +74,14 @@
 					<ul class="bill-list">
 						@for (bill of activeBills(); track bill.id) {
 							<li class="bill-item">
-								<div class="bill-icon" aria-hidden="true">B</div>
-								<div class="bill-details">
-									<h3>{{ bill.name }}</h3>
-									<p>ID <span>{{ bill.id }}</span></p>
-								</div>
-								<span class="status-pill"><span aria-hidden="true"></span>Active</span>
+								<a class="bill-link" [routerLink]="['/admin/bill', bill.id]" [attr.aria-label]="'View stats for ' + bill.name">
+									<div class="bill-icon" aria-hidden="true">B</div>
+									<div class="bill-details">
+										<h3>{{ bill.name }}</h3>
+										<p>ID <span>{{ bill.id }}</span></p>
+									</div>
+									<span class="status-pill"><span aria-hidden="true"></span>Active</span>
+								</a>
 							</li>
 						}
 					</ul>
