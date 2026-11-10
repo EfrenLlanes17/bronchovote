@@ -7,7 +7,7 @@
 				<p class="intro">Create a bill and make it available in the active voting list.</p>
 			</div>
 			<div class="active-count" aria-label="Active bill count">
-				<strong>{{ activeBills.length }}</strong>
+				<strong>{{ activeBills().length }}</strong>
 				<span>active</span>
 			</div>
 		</header>
@@ -27,7 +27,8 @@
 					<input
 						id="bill-id"
 						name="billId"
-						[(ngModel)]="billId"
+						[ngModel]="billId()"
+						(ngModelChange)="billId.set($event)"
 						placeholder="e.g. HB-1042"
 						autocomplete="off"
 						maxlength="64"
@@ -41,20 +42,21 @@
 					<input
 						id="bill-name"
 						name="billName"
-						[(ngModel)]="billName"
+						[ngModel]="billName()"
+						(ngModelChange)="billName.set($event)"
 						placeholder="e.g. Community Health Funding Act"
 						maxlength="160"
 						required
 					/>
 
-					<button type="submit" [disabled]="saving">
-						{{ saving ? 'Saving…' : 'Add bill to active list' }} <span aria-hidden="true">→</span>
+					<button type="submit" [disabled]="saving()">
+						{{ saving() ? 'Saving…' : 'Add bill to active list' }} <span aria-hidden="true">→</span>
 					</button>
 				</form>
 
-				@if (feedbackMessage) {
-					<p class="feedback" [class.error]="feedbackType === 'error'" role="status" aria-live="polite">
-						{{ feedbackMessage }}
+				@if (feedbackMessage()) {
+					<p class="feedback" [class.error]="feedbackType() === 'error'" role="status" aria-live="polite">
+						{{ feedbackMessage() }}
 					</p>
 				}
 			</section>
@@ -65,12 +67,12 @@
 						<p class="section-label">CURRENT VOTING</p>
 						<h2 id="active-title">Active bills</h2>
 					</div>
-					<span class="count-pill">{{ activeBills.length }}</span>
+					<span class="count-pill">{{ activeBills().length }}</span>
 				</div>
 
-				@if (activeBills.length) {
+				@if (activeBills().length) {
 					<ul class="bill-list">
-						@for (bill of activeBills; track bill.id) {
+						@for (bill of activeBills(); track bill.id) {
 							<li class="bill-item">
 								<div class="bill-icon" aria-hidden="true">B</div>
 								<div class="bill-details">

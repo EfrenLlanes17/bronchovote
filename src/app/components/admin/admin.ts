@@ -1,4 +1,4 @@
-import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Bill, BillStore } from '../../services/bill-store';
 
@@ -9,29 +9,24 @@ import { Bill, BillStore } from '../../services/bill-store';
   templateUrl: './admin.html',
 })
 export class Admin implements OnInit, OnDestroy {
-  protected billId = '';
-  protected billName = '';
-  protected activeBills: Bill[] = [];
-  protected feedbackMessage = '';
-  protected feedbackType: 'error' | 'success' = 'success';
-  protected saving = false;
+  protected billId = signal('');
+  protected billName = signal('');
+  protected activeBills = signal<Bill[]>([]);
+  protected feedbackMessage = signal('');
+  protected feedbackType = signal<'error' | 'success'>('success');
+  protected saving = signal(false);
 
   private stopWatchingBills?: () => void;
 
-  constructor(
-    private readonly billStore: BillStore,
-    private readonly ngZone: NgZone,
-  ) {}
+  constructor(private readonly billStore: BillStore) {}
 
   ngOnInit(): void {
     this.stopWatchingBills = this.billStore.watchActiveBills(
-      (bills) => this.ngZone.run(() => (this.activeBills = bills)),
+      (bills) => this.activeBills.set(bills),
       () =>
-        this.ngZone.run(() =>
-          this.setFeedback(
-            'Could not load bills. Check the Realtime Database URL and read permissions.',
-            'error',
-          ),
+        this.setFeedback(
+          'Could not load bills. Check the Realtime Database URL and read permissions.',
+          'error',
         ),
     );
   }
@@ -43,8 +38,8 @@ export class Admin implements OnInit, OnDestroy {
   protected async createBill(event: SubmitEvent): Promise<void> {
     event.preventDefault();
 
-    const id = this.billId.trim();
-    const name = this.billName.trim();
+    const id = this.billId().trim();
+    const name = this.billName().trim();
     if (!id || !name) return;
 
     if (!/^[A-Za-z0-9_-]+$/.test(id)) {
@@ -52,7 +47,7 @@ export class Admin implements OnInit, OnDestroy {
       return;
     }
 
-    this.saving = true;
+    this.saving.set(true);
     try {
       const created = await this.billStore.createBill(id, name);
       if (!created) {
@@ -60,8 +55,13 @@ export class Admin implements OnInit, OnDestroy {
         return;
       }
 
-      this.billId = '';
-      this.billName = '';
+      this.activeBills.update((bills) =>
+        bills.some((bill) => bill.id.toLowerCase() === id.toLowerCase())
+          ? bills
+          : [...bills, { id, name, active: true }],
+      );
+      this.billId.set('');
+      this.billName.set('');
       this.setFeedback('Bill created and added to the active list.', 'success');
     } catch {
       this.setFeedback(
@@ -69,12 +69,12 @@ export class Admin implements OnInit, OnDestroy {
         'error',
       );
     } finally {
-      this.saving = false;
+      this.saving.set(false);
     }
   }
 
   private setFeedback(message: string, type: 'error' | 'success'): void {
-    this.feedbackMessage = message;
-    this.feedbackType = type;
+    this.feedbackMessage.set(message);
+    this.feedbackType.set(type);
   }
 }
